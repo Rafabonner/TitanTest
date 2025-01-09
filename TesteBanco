@@ -1,0 +1,115 @@
+CREATE TABLE produtos (
+    cod_prod INTEGER(8),
+    loj_prod INTEGER(8),
+    desc_prod CHAR(40),
+    dt_inclu_prod DATE,
+    preco_prod DECIMAL(8,3),
+    PRIMARY KEY (cod_prod, loj_prod)
+);
+
+
+INSERT INTO produtos (cod_prod, loj_prod, desc_prod, dt_inclu_prod, preco_prod)
+VALUES (170, 2, 'LEITE CONDENSADO MOCOCA', '2010-12-30', 45.40);
+
+
+UPDATE produtos
+SET preco_prod = 95.40
+WHERE cod_prod = 170 AND loj_prod = 2;
+
+
+SELECT * 
+FROM produtos
+WHERE loj_prod IN (1, 2);
+
+
+SELECT 
+    MIN(dt_inclu_prod) AS menor_data,
+    MAX(dt_inclu_prod) AS maior_data
+FROM produtos;
+
+
+SELECT COUNT(*) AS total_registros
+FROM produtos;
+
+SELECT *
+FROM produtos
+WHERE desc_prod LIKE 'L%';
+
+
+SELECT loj_prod, SUM(preco_prod) AS total_preco
+FROM produtos
+GROUP BY loj_prod;
+
+
+SELECT loj_prod, SUM(preco_prod) AS total_preco
+FROM produtos
+GROUP BY loj_prod
+HAVING SUM(preco_prod) > 100000;
+
+------------------------------------------------------
+
+CREATE TABLE produtos (
+    cod_prod INT(8) NOT NULL,
+    loj_prod INT(8) NOT NULL,
+    desc_prod CHAR(40),
+    dt_inclu_prod DATE,
+    preco_prod DECIMAL(8,3),
+    PRIMARY KEY (cod_prod, loj_prod)
+);
+
+CREATE TABLE estoque (
+    cod_prod INT(8) NOT NULL,
+    loj_prod INT(8) NOT NULL,
+    qtd_prod DECIMAL(15,3),
+    PRIMARY KEY (cod_prod, loj_prod),
+    FOREIGN KEY (cod_prod, loj_prod) REFERENCES produtos(cod_prod, loj_prod) ON DELETE CASCADE
+);
+
+CREATE TABLE lojas (
+    loj_prod INT(8) NOT NULL,
+    desc_loj CHAR(40),
+    PRIMARY KEY (loj_prod)
+);
+
+
+SELECT 
+    p.loj_prod AS codigo_loja,
+    l.desc_loj AS descricao_loja,
+    p.cod_prod AS codigo_produto,
+    p.desc_prod AS descricao_produto,
+    p.preco_prod AS preco_produto,
+    e.qtd_prod AS quantidade_estoque
+FROM 
+    produtos p
+JOIN 
+    lojas l ON p.loj_prod = l.loj_prod
+JOIN 
+    estoque e ON p.cod_prod = e.cod_prod AND p.loj_prod = e.loj_prod
+WHERE 
+    p.loj_prod = 1;
+
+
+SELECT 
+    p.cod_prod AS codigo_produto,
+    p.desc_prod AS descricao_produto,
+    p.preco_prod AS preco_produto
+FROM 
+    produtos p
+LEFT JOIN 
+    estoque e ON p.cod_prod = e.cod_prod AND p.loj_prod = e.loj_prod
+WHERE 
+    e.qtd_prod IS NULL;
+
+
+
+SELECT 
+    e.cod_prod AS codigo_produto,
+    e.loj_prod AS codigo_loja,
+    e.qtd_prod AS quantidade_estoque
+FROM 
+    estoque e
+LEFT JOIN 
+    produtos p ON e.cod_prod = p.cod_prod AND e.loj_prod = p.loj_prod
+WHERE 
+    p.cod_prod IS NULL;
+
